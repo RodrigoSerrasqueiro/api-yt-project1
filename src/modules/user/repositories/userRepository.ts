@@ -56,6 +56,10 @@ class UserRepository {
             return response.status(400).json({error: "Erro na sua autenticação"});
           }
 
+          if (results.length === 0) {
+            return response.status(400).json({error: "Usuário não encontrado"});
+          }
+
           compare(password, results[0].password, (err, result) => {
 
             if (err) {
@@ -69,6 +73,8 @@ class UserRepository {
               }, process.env.SECRET as string, {expiresIn: "1d"})
 
               return response.status(200).json({token: token, message: "Autenticado com sucesso"});
+            } else {
+              return response.status(400).json({error: "Usuário ou senha incorretos. Verifique os dados e tente novamente."});
             }
           })
         }
