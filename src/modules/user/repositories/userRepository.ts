@@ -18,21 +18,35 @@ class UserRepository {
         }
 
         connection.query(
-
-          'INSERT INTO users (user_id, name, email, password) VALUES (?,?,?,?)',
-
-          [uuidv4(), name, email, hash],
-          
-          (error: any, result: any, filds: any) => {
-            connection.release();
-
+          'SELECT email FROM users WHERE email = ?',
+          [email],
+          (error: any, result: any, fields: any) => {
             if (error) {
-              return response.status(400).json(error);
+              connection.release();
+              return response.status(500).json(error);
             }
-
-            response.status(200).json({message: "Usuário criado com sucesso"});
+        
+            if (result.length > 0) {
+              connection.release();
+              return response.status(409).json({message: "E-mail já existe"});
+            }
+        
+            // Se chegou até aqui, o e-mail não existe no banco de dados, então pode inserir o usuário normalmente
+            connection.query(
+              'INSERT INTO users (user_id, name, email, password) VALUES (?,?,?,?)',
+              [uuidv4(), name, email, hash],
+              (error: any, result: any, fields: any) => {
+                connection.release();
+        
+                if (error) {
+                  return response.status(400).json(error);
+                }
+        
+                response.status(200).json({message: "Usuário criado com sucesso"});
+              }
+            );
           }
-        )
+        );
       })  
     })
   }
