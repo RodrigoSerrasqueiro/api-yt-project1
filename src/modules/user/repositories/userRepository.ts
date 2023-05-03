@@ -53,7 +53,7 @@ class UserRepository {
 
   login(request: Request, response: Response){
 
-    const {name, email, password} = request.body;
+    const {email, password} = request.body;
 
     pool.getConnection((err: any, connection: any) => {
 
